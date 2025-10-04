@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC 卡贴生成器</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f3f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        button, label {
+            padding: 10px 18px;
+            font-size: 18px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            background-color: #07C160;
+            color: white;
+            cursor: pointer;
+            display: inline-block;
+        }
+        button:hover, label:hover {
+            background-color: #05a84f;
+        }
+        .card {
+            width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f5f9fa, #ffffff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        .wechat-icon {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 70px;
+            height: 70px;
+            background-image: url("https://images.icon-icons.com/1488/PNG/512/5368-wechat_102582.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .title {
+            font-size: 46px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .name {
+            font-size: 85px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 35px;
+        }
+        .tip {
+            display: flex;
+            align-items: center;
+            font-size: 42px;
+            font-weight: bold;
+            color: #333;
+        }
+        .arrow {
+            color: #ff3b30;
+            margin-right: 15px;
+            font-size: 50px;
+        }
+        .bottom-line {
+            position: absolute;
+            bottom: 25px;
+            left: 30px;
+            right: 30px;
+            height: 6px;
+            background-color: #07C160;
+            border-radius: 3px;
+        }
+        [contenteditable="true"] {
+            outline: none;
+            cursor: text;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="downloadBtn">生成图片并下载</button>
+        <button id="resetBtn">复原</button>
+        <label>
+            更换图标
+            <input type="file" id="iconUpload" accept="image/*" style="display:none;">
+        </label>
+    </div>
+
+    <div class="card" id="card">
+        <div class="wechat-icon" id="icon"></div>
+        <div class="title" id="cardTitle" contenteditable="true">微信视频通话</div>
+        <div class="name" id="cardName" contenteditable="true">张三</div>
+        <div class="tip">
+            <span class="arrow">→</span>
+            <span id="cardTip" contenteditable="true">贴手机自动拨打</span>
+        </div>
+        <div class="bottom-line"></div>
+    </div>
+
+    <script>
+        const downloadBtn = document.getElementById("downloadBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const iconUpload = document.getElementById("iconUpload");
+        const icon = document.getElementById("icon");
+
+        const card = document.getElementById("card");
+        const cardTitle = document.getElementById("cardTitle");
+        const cardName = document.getElementById("cardName");
+        const cardTip = document.getElementById("cardTip");
+
+        const defaults = {
+            title: "微信视频通话",
+            name: "张三",
+            tip: "贴手机自动拨打",
+            icon: "https://images.icon-icons.com/1488/PNG/512/5368-wechat_102582.png"
+        };
+
+        // 生成图片
+        downloadBtn.addEventListener("click", () => {
+            html2canvas(card).then(canvas => {
+                const link = document.createElement("a");
+                link.download = (cardName.textContent.trim() || "卡贴") + ".png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        });
+
+        // 复原按钮
+        resetBtn.addEventListener("click", () => {
+            cardTitle.textContent = defaults.title;
+            cardName.textContent = defaults.name;
+            cardTip.textContent = defaults.tip;
+            icon.style.removeProperty("background-image");
+            icon.style.backgroundImage = `url(${defaults.icon})`;
+            iconUpload.value = ""; // 清空上传记录
+        });
+
+        // 上传替换图标
+        iconUpload.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    icon.style.backgroundImage = `url(${evt.target.result})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
